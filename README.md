@@ -1,72 +1,57 @@
 # Cyan Grove
 
-一个按需安装的 macOS 个人工具工作台。各项能力已拆成独立软件，可以通过 Grove 管理，也可以直接下载各自的 Release 使用。
+macOS 个人工具工作台。功能按需下载安装和更新，**完整功能直接在 Grove 窗口内使用**。
 
-## 项目与下载
+每个功能仓库提供同一份原生功能包和一个独立版 App。Grove 动态加载功能包中的界面与业务逻辑；独立版使用同一个功能包。Grove 本身不内置五项业务实现，也不需要启动其他 App 来显示功能页面。
 
-| 项目 | 能力 | 下载 |
-| --- | --- | --- |
-| Cyan Grove | 模块中心、安装更新、统一状态、启动控制 | [工作台 Releases](https://github.com/CyanYuanChu/cyangrove/releases) |
-| [Cyan Command](https://github.com/CyanYuanChu/cyan-command) | 右 Command＋空格、指令面板、本地英译中 | [Releases](https://github.com/CyanYuanChu/cyan-command/releases) |
-| [Cyan Monitor](https://github.com/CyanYuanChu/cyan-monitor) | CPU、内存、磁盘、网速与菜单栏 | [Releases](https://github.com/CyanYuanChu/cyan-monitor/releases) |
-| [Cyan Codex Usage](https://github.com/CyanYuanChu/cyan-codex-usage) | 官方额度、本机 Token、日历和小票导出 | [Releases](https://github.com/CyanYuanChu/cyan-codex-usage/releases) |
-| [Cyan GitHub](https://github.com/CyanYuanChu/cyan-github) | 贡献日历、提交、仓库、WidgetKit 桌面组件 | [Releases](https://github.com/CyanYuanChu/cyan-github/releases) |
-| [Cyan Passport](https://github.com/CyanYuanChu/cyan-passport) | AI Passport 语音桥、配对和模型配置 | [Releases](https://github.com/CyanYuanChu/cyan-passport/releases) |
+## 开始使用
 
-当前是 **Apple Silicon 开发预览版**，最低 macOS 14，翻译模块需要 macOS 15。安装包使用 ad hoc 签名，未做 Developer ID 公证，macOS 可能阻止首次打开。不要关闭系统安全保护；需要常规免拦截安装时，请等待正式签名版。SHA-256 校验确保包与发布目录一致，不代表 Apple 公证。
+从 [Releases](https://github.com/CyanYuanChu/cyangrove/releases) 下载 Grove。打开「功能管理」，开启需要的功能：未安装时自动从对应 GitHub 仓库下载功能包，随后在侧栏和当前窗口里直接使用。
 
-## 使用
+| 功能 | 仓库 |
+| --- | --- |
+| 快速指令 | [cyan-command](https://github.com/CyanYuanChu/cyan-command) |
+| 系统监控 | [cyan-monitor](https://github.com/CyanYuanChu/cyan-monitor) |
+| Codex 驾驶舱 | [cyan-codex-usage](https://github.com/CyanYuanChu/cyan-codex-usage) |
+| GitHub 足迹与桌面组件 | [cyan-github](https://github.com/CyanYuanChu/cyan-github) |
+| AI Passport | [cyan-passport](https://github.com/CyanYuanChu/cyan-passport) |
 
-1. 从 Releases 下载工作台安装包，解压后放到应用程序目录。
-2. 打开「模块中心」，点击需要的模块的「安装模块」。工作台下载编译好的安装包，不要求 Git、Xcode 或源码编译。
-3. 点击「启动」打开模块；在「管理」中选择随 Grove 启动、合并菜单栏或独立显示。
-4. 退出 Grove 后，模块继续运行并恢复自己的菜单栏。点击「停止」才退出相应模块。
+只想使用一项能力的人，可以从对应仓库 Releases 下载独立版 App，不需要安装 Grove。
 
-模块安装在 `~/Applications`。卸载只将 App 移到废纸篓，保留配置和历史；已在 `/Applications` 安装的同名模块可以被识别，但不会由 Grove 自动删除。
+## 安装、开启与更新
 
-详细功能在各模块自己的原生窗口中提供。工作台目前集成安装、启停、摘要和菜单栏信息，不会把其他软件的窗口嵌入自己的页面。未安装的模块不会被初始化、扫描数据或启动后台服务。
+- 功能包名称包含 `-module-`，安装到 Grove 的应用数据目录，不会额外安装五个独立软件。
+- 侧栏进入功能后，显示模块提供的完整原生页面：翻译、系统图表、Codex 额度/日历/导出、GitHub 账户和提交、Passport 配对与配置均在 Grove 内操作。
+- 功能开关控制采集、快捷键和桥接生命周期；停用后停止本模块的后台工作。关闭 Grove 窗口保留菜单栏和已开启功能，退出 Grove 则停止它托管的功能。
+- 更新模块无需重新下载 Grove。为安全保留 Swift 原生代码和类型元数据，已加载模块的新版本在重启 Grove 后生效；更新前的功能可以继续使用。
+- 模块卸载保留设置和历史。Grove 与独立版共用模块自己的设置和数据，单实例锁避免两边同时占用功能。
 
-## 模块自身的前提
+GitHub 模块首次启用时会注册一个不显示业务窗口的 WidgetKit 支持程序，用于 macOS 桌面组件。点击组件返回 Grove 的 GitHub 页面；使用其他功能无需打开该支持程序。
 
-- **Command**：系统英中翻译语言包；全局快捷键需要单独授予新 App 辅助功能权限。可通过模块菜单打开面板。
-- **Monitor**：不需要其他模块或 Codex。
-- **Codex Usage**：本机已安装并登录 Codex CLI，或者安装包含 CLI 的 Codex 桌面 App；读取正常登录，不打包凭据。
-- **GitHub**：工作台明细使用 `gh auth login` 的本机登录；桌面组件读取公开贡献。
-- **Passport**：支持的 Python 环境、语音依赖和已配对设备；App 内提供运行环境准备入口。原设备桥运行时，应先在旧版中结束通话再迁移，不能同时占用同一端口。
+## 版本和环境
 
-## 从源码构建
+当前为 Apple Silicon 开发预览版。Grove 最低 macOS 14，快速指令需要 macOS 15 和系统英中语言包。全局快捷键需要给 Grove 授予辅助功能权限。Codex 和 GitHub 使用本机 CLI 正常登录；Passport 的 Python 运行环境可在 Grove 页面中准备。
 
-本仓库只构建工作台，不需要检出其他五个仓库。
+预览包使用 ad hoc 签名，未做 Developer ID 公证，系统可能阻止首次打开。请勿关闭系统安全保护；常规免拦截分发需要后续正式签名与公证。
+
+原整合版正在通话时，新的 Passport 页面不会接管或停止原桥接。结束旧通话并停止旧版后，再启动新桥接。旧版 Grove 尚未退出时，新的 Command 页面可翻译，但暂不重复注册全局快捷键。
+
+## 开发
+
+工作台单独构建，不需要其他仓库：
 
 ```sh
 ./scripts/build-modular.sh
 ./scripts/check-modular.sh
 ```
 
-需要 Xcode 和 Python 3，产物为 `build/Cyan Grove.app`。`CODE_SIGN_IDENTITY` 可指定你自己的签名身份。模块分别在各自仓库运行 `./scripts/build.sh` 和 `./scripts/check.sh`。
+模块仓库各自使用 `./scripts/build.sh` 和 `./scripts/check.sh`，产出 `.groveplugin` 和复用它的独立 `.app`。
 
-需要同时开发模块时，可以选择性检出源码：
+完整集成验收（可选）：
 
 ```sh
-python3 scripts/checkout-modules.py cyan-command cyan-monitor
+python3 scripts/checkout-modules.py cyan-command cyan-monitor cyan-codex-usage cyan-github cyan-passport
+python3 scripts/test-native-modules.py
 ```
 
-这属于开发流程；安装和运行无需检出源码，也不使用 Git submodule。
-
-## 更新与协议
-
-工作台内置模块目录，包含仓库、版本、最低系统、架构、Bundle ID、协议版本和安装包 SHA-256。安装前先校验摘要、应用身份和代码签名，再替换安装；失败时保留原安装。更新运行中的模块前需先停止它。
-
-「检查更新」查询各仓库 Releases，并读取同一仓库下的 `module.json`。只接受匹配的模块身份、协议和架构。当前渠道包含明确标注的预览版本。
-
-控制接口使用当前用户私有目录中的 Unix socket，不监听网络端口；每个模块使用独占锁保持单实例。协议与迁移说明见 [docs/modules.md](docs/modules.md)。
-
-独立模块从原整合版按白名单迁移各自的设置和数据，保留原文件。原版 GitHub 桌面组件需要在独立 GitHub App 安装后重新添加。新的 App 身份也可能需要重新授予系统权限。
-
-## 0.8.0：首次扫码配网与 Agent 路由
-
-AI Passport 页面增加 Codex／Hermes Agent 后端选择、Hermes Gateway 地址和五分钟新设备配对码。设备扫码热点配网需新版固件，未通话时长按下键进入；旧配对在新连接与配对验证成功前保留。电脑以 mDNS 广播服务，不进行路由器／端口扫描。配对资料经一次性码派生密钥加密认证。
-
-Hermes 安装与模型配置已完成：稳定版 v0.22.5，openai-codex / gpt-6.1-sol。独立 OAuth 授权及真实模型调用仍待完成。该路由使用本地 Whisper base 与 macOS Tingting，自动断句，在执行及播报期间暂停收音，延迟高于 Codex WebRTC；会话独立，支持停止当前 Runs API 任务。运行时以用户选择的 Bypass 启动其拥有的本地网关，其他权限模式暂不支持。配置向后兼容旧版 settings.json。
-
-Release 构建和签名通过，GitHub 27 项、个人功能 55 项检查通过。新增网页验证为模拟环境；手机与设备配网仍需真机验收。
+接口、更新和生命周期见 [docs/modules.md](docs/modules.md)。

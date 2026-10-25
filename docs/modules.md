@@ -1,42 +1,50 @@
-# 模块结构与维护
+# 原生功能包架构 v2
 
-本次拆分将产品边界与仓库边界对齐：一个工作台、五个独立软件。每个模块的仓库包含全部构建源码、原生 UI、自己的入口、资源、自检和构建脚本；没有引用父仓库的相对路径或依赖其他模块。
+Grove 是承载完整功能的应用。每个模块是一份独立发布的原生功能包 `.groveplugin`，通过稳定的 Objective-C 接口交付 `NSViewController`、启动、停止、刷新和摘要。该控制器由模块自己的 SwiftUI 页面构成，直接嵌入 Grove 的内容区。
 
-`Hub/` 是工作台，`Resources/modules.json` 是发布目录。UI 不再构造 SystemMonitor、CodexStore、QuickCommandService 或 PassportBridgeStore。详细设置、图表和功能由独立模块窗口承载，工作台显示它们返回的摘要。
+模块的独立版 App 是很薄的启动壳，加载同一份功能包并创建自己的窗口。界面、业务和资源只有一份实现。集成使用不会启动独立版 App，也不会通过摘要卡片代替功能页面。
 
-## 控制协议 v1
+## 接口与进程
 
-Unix socket 位于 `/tmp/cyan-modules-<uid>/<module-id>.sock`，父目录权限 0700、socket 0600。启动时验证目录归属、类型和权限；通过 `flock` 防止同一用户重复实例。请求和响应均为一行 JSON，上限 64 KiB，读写超时 3 秒。
+`PluginAPI.swift` 声明 Objective-C 协议 `CyanGroveFeatureV2`，C 工厂符号为 `cyan_grove_feature_create_v2`。Grove 校验安装包哈希、模块身份、接口版本、最低系统和代码签名后，通过该入口取得模块实例。
 
-请求示例：
+功能启用后，UI、系统采样、额度查询和控制逻辑在 Grove 进程内运行。Passport 的 Python 语音进程仍由该模块控制。独立模式使用同样的原生代码，但宿主进程为独立 App。
 
-```json
-{"protocolVersion":1,"action":"status"}
+当前用户私有目录内的文件锁限制同一功能只由一个宿主启用，避免 Grove 与独立版重复注册快捷键、扫描数据或占用设备。独立版保留私有 Unix socket 控制面，传输协议为 v1；它与原生功能包 ABI v2 是不同的接口。
+
+停用模块释放功能锁并停止采样、刷新定时器、快捷键与本模块拥有的桥接。关闭 Grove 窗口不会退出；退出应用会停止它启用的功能。其他来源的桥接和正在进行的旧版通话不会被接管或结束。
+
+## 安装与独立更新
+
+功能包位于：
+
+```
+~/Library/Application Support/CyanGroveHub/Modules/<id>/<version>/<id>.groveplugin
 ```
 
-响应包含 `protocolVersion`、`id`、`version`、`ok`、`pid`、`integrated` 和 `summary`。控制动作包括 `status`、`show`、`refresh`、`quit`、`integrated`、`standalone`。Command 额外支持 `panel`；Passport 的 `start` 和 `stop` 只控制其自行启动或确认归属的桥接进程。未知动作被拒绝，不接受 shell 命令、任意路径或推理输入。
+每个模块有独立的 `installed.json`。版本目录不可原地覆盖。更新先验证并安装新版本，再原子更新版本记录；验证失败时保留原版本。相同版本号下出现不同代码或资源时拒绝替换，要求发布新的版本号。
 
-工作台退出不会关闭模块。合并菜单栏的模块每 10 秒检查工作台是否存活，失联时恢复独立菜单栏，因此工作台崩溃也不会让运行中的模块失去入口。
+Swift 运行时可能保留类型元数据，因此不对已加载库执行 `dlclose`，也不在同一进程中热替换同名类。运行中的旧版本继续可用，新版本在重启 Grove 后加载。这不要求重新构建或下载 Grove。
 
-每个仓库中少量协议、启动和样式源码随项目附带，属于构建时复用。用户无需额外安装共享运行库。协议变化需要明确提高版本并保留兼容边界。
+更新目录仅接受当前账号下已登记仓库的兼容模块身份。检查结果及安装版本会持久保存，重启后不会退回应用最初内置的模块版本。
 
-## 数据归属
+每个模块 Release 提供：
 
-| 模块 | 数据 |
-| --- | --- |
-| Command | 自己的 UserDefaults；翻译内容仅在内存 |
-| Monitor | 自己的显示设置；采样仅在内存 |
-| Codex Usage | `~/Library/Application Support/CyanCodexUsage` |
-| GitHub | 既有 `~/Library/Application Support/GitGrove` 缓存与独立账户设置 |
-| Passport | `~/Library/Application Support/CyanPassport` |
-| Grove | `CyanGroveHub` 安装暂存目录与工作台自己的启用列表 |
+- `*-module-macOS-arm64.zip`：Grove 使用的原生功能包。
+- `*-macOS-arm64.zip`：使用相同功能包的独立版 App。
+- `module.json`：两种产物的身份、版本、哈希与平台要求。
+- `SHA256SUMS`：安装包摘要。
 
-迁移不会删除旧资料，不迁移旧 PID、运行状态或日志来假装接管旧进程。私钥、令牌和本机会话不在源码与安装包中。Codex CLI 和 GitHub CLI 的登录仍由它们自己管理。
+## 数据与权限
 
-## 发布
+所有模块使用各自 Bundle ID 对应的 UserDefaults suite，确保 Grove 与独立版共用配置，又不会互相混用设置。原整合版设置按白名单迁移，保留原资料。
 
-模块各自独立版本化。每个预览 Release 包含 App ZIP、`module.json` 与 `SHA256SUMS`。清单中的 `sha256` 指向 ZIP。工作台包内目录锁定已验证版本，可通过显式检查更新发现后续版本。
+Codex 数据位于 `CyanCodexUsage`；GitHub 缓存保留 `GitGrove`；Passport 使用 `CyanPassport`。配对密钥和会话数据不会进入源码或发布包。Grove 托管快捷键时，辅助功能权限属于 Grove；独立运行时属于对应 App。
 
-目前只在本机 Apple Silicon Mac 验证，未做 Intel 或最低系统版本实机验收。GitHub Widget 扩展完成编译和签名检查；系统组件库添加仍须在实际桌面单独验收。语音桥拆分不代表已完成新设备配对与长时语音验收。
+WidgetKit 要求扩展由 App 承载，因此 GitHub 功能包附带一个无业务窗口的组件支持 App，首次启用时注册。它的组件点击链接返回 Grove。独立版 App 则携带自己的 WidgetKit 扩展。系统组件库添加和新设备语音仍需单独实机验收，编译通过不代表已经完成这些验收。
 
-正式公开版还需 Developer ID 签名、公证及相应机型验收。仓库的 CI 在 macOS runner 上独立构建和自检；下载依赖与外部服务另行验证。
+## 验证
+
+模块仓库分别构建、自检和检查独立版单实例控制。工作台自检安装包损坏、错误身份、不兼容接口、路径越界与失败保留原版本。
+
+完整集成测试将五个真实模块同时加载到同一 Grove 进程，确认它们提供原生界面、不创建独立业务窗口、阻止独立版重复启用，并检查停用和重新启用。验收模式不启动语音、不监听全局快捷键，也不注册桌面组件。
