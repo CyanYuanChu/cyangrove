@@ -47,7 +47,7 @@ struct HubView:View {
                 Button("刷新"){Task{await center.action(m,"refresh")}}.disabled(!center.active.contains(m.id))
                 Button("模块设置"){center.selected="manage:"+m.id}
             }
-            Text("PREVIEW · 0.9.0").font(.system(size:10,design:.monospaced)).foregroundStyle(p.secondary)
+            Text("PREVIEW · 0.9.0 (2)").font(.system(size:10,design:.monospaced)).foregroundStyle(p.secondary)
         }.padding(.horizontal,28).frame(height:64).background(p.card)
     }
     func title(_ m:ModuleDescriptor)->String{["cyan-command":"快速指令","cyan-monitor":"系统监控","cyan-codex-usage":"Codex 驾驶舱","cyan-github":"GitHub 足迹","cyan-passport":"AI Passport"][m.id] ?? m.name}

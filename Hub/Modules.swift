@@ -104,6 +104,7 @@ enum ModuleFiles {
         timer=Timer.scheduledTimer(withTimeInterval:2,repeats:true){[weak self] _ in Task{@MainActor in self?.poll()}}
     }
     func controller(_ id:String)->NSViewController?{guard active.contains(id) else{return nil};return images[id]?.plugin.contentController}
+    func menuBarImage(_ id:String)->NSImage?{guard active.contains(id) else{return nil};return images[id]?.plugin.menuBarImage ?? nil}
     func loadedVersion(_ id:String)->String?{images[id]?.plugin.moduleInfo["version"] as? String}
     func needsRestart(_ m:ModuleDescriptor)->Bool{guard let version=loadedVersion(m.id),let installed=ModuleFiles.installedDescriptor(m) else{return false};return installed.version != version}
     func poll(){

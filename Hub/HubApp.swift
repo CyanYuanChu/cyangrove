@@ -8,9 +8,11 @@ import AppKit
         do {
             guard try server.start(id:"cyangrove",handler:{ [weak self] action in
                 if action == "show" {self?.show()}
+                if action == "check-updates" {await self?.center.checkUpdates()}
+                if action.hasPrefix("install:") {let id=String(action.dropFirst(8));if let m=self?.center.modules.first(where:{$0.id==id}) {await self?.center.install(m)}}
                 if action == "quit" {DispatchQueue.main.asyncAfter(deadline:.now()+0.15){NSApp.terminate(nil)}}
                 if action.hasPrefix("enable:") || action.hasPrefix("disable:") || action.hasPrefix("navigate:") { let parts=action.split(separator:":",maxSplits:1);if parts.count==2,let m=self?.center.modules.first(where:{$0.id==String(parts[1])}) { if parts[0]=="navigate" {self?.center.selected=m.id;self?.show()}else{await self?.center.setEnabled(m,parts[0]=="enable")} } }
-                return ["protocolVersion":1,"id":"cyangrove","ok":true,"installed":self?.center.modules.filter{ModuleFiles.installed($0) != nil}.count ?? 0,"active":Array(self?.center.active ?? []),"embedded":true,"pid":ProcessInfo.processInfo.processIdentifier]
+                return ["protocolVersion":1,"id":"cyangrove","ok":true,"installed":self?.center.modules.filter{ModuleFiles.installed($0) != nil}.count ?? 0,"active":Array(self?.center.active ?? []),"embedded":true,"menuImageWidth":self?.center.menuBarImage("cyan-monitor")?.size.width ?? 0,"versions":self?.center.snapshots.mapValues{$0.version} ?? [:],"pendingRestart":self?.center.modules.filter{self?.center.needsRestart($0)==true}.map{$0.id} ?? [],"pid":ProcessInfo.processInfo.processIdentifier]
             }) else {Task.detached {_ = try? ModuleIPC.request("cyangrove",action:"show");await MainActor.run{NSApp.terminate(nil)}};return}
         } catch {print(error.localizedDescription);NSApp.terminate(nil);return}
         let w=NSWindow(contentRect:NSRect(x:0,y:0,width:1180,height:880),styleMask:[.titled,.closable,.miniaturizable,.resizable],backing:.buffered,defer:false)
@@ -32,9 +34,10 @@ import AppKit
         item?.button?.image=NSImage(systemSymbolName:"leaf",accessibilityDescription:"Cyan Grove")
         var parts:[String]=[]
         if let monitor=center.snapshots["cyan-monitor"],monitor.running {
-            for key in ["CPU","内存","下载","上传"] {if let value=monitor.summary[key] {parts.append((key == "下载" ? "↓":key == "上传" ? "↑":key)+" "+value)}}
+            for key in ["CPU","内存","磁盘剩余","下载","上传"] {if let value=monitor.summary[key] {parts.append((key == "下载" ? "↓":key == "上传" ? "↑":key)+" "+value)}}
         }
         if let codex=center.snapshots["cyan-codex-usage"],codex.running,let value=codex.summary["剩余额度"] {parts.append("Codex "+value)}
+        if let image=center.menuBarImage("cyan-monitor") { item?.button?.image=image; parts=parts.filter{$0.hasPrefix("Codex ")} }
         item?.button?.title=parts.isEmpty ? "":" "+parts.joined(separator:"  ");item?.button?.font=NSFont.monospacedDigitSystemFont(ofSize:10,weight:.regular)
         item?.button?.toolTip="Cyan Grove · 运行中 \(center.snapshots.values.filter(\.running).count) 个模块"
     }

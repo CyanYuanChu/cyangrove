@@ -59,7 +59,7 @@
   {
     "id": "cyan-monitor",
     "name": "Cyan Monitor",
-    "version": "0.2.0-preview.1",
+    "version": "0.2.0-preview.2",
     "bundleID": "io.github.cyanyuanchu.cyan-monitor",
     "protocolVersion": 2,
     "minMacOS": "14.0",
@@ -71,9 +71,9 @@
     "moduleName": "cyan-monitor.groveplugin",
     "pluginBundleID": "io.github.cyanyuanchu.cyan-monitor.feature",
     "assetName": "Cyan-Monitor-module-macOS-arm64.zip",
-    "sha256": "7520a800f2636eff206b20f6f8671a28ae713b97ea8ddde0e05b67d36464fccc",
+    "sha256": "05dca89b9e25df9ade1de2f496535f2a7f3b73b4d0e2a23197b1b90c0c88bd4e",
     "standaloneAssetName": "Cyan-Monitor-macOS-arm64.zip",
-    "standaloneSha256": "4885e937f0db3fbd828acfbfa05121138fd4c082581f2267f8f637b0b4fba234"
+    "standaloneSha256": "112628e9d2b15211763c520ffb30699d3978735fa72e23818db06e3b12e682b0"
   },
   {
     "id": "cyan-passport",

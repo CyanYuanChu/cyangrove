@@ -7,6 +7,7 @@ import Darwin
     var moduleInfo: NSDictionary { get }
     var contentController: NSViewController { get }
     var summary: NSDictionary { get }
+    @objc optional var menuBarImage: NSImage? { get }
     func startFeature() -> NSString?
     func stopFeature()
     func refreshFeature()
