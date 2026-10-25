@@ -17,7 +17,7 @@
   {
     "id": "cyan-command",
     "name": "Cyan Command",
-    "version": "0.1.0-preview.1",
+    "version": "0.1.0-preview.2",
     "bundleID": "io.github.cyanyuanchu.cyan-command",
     "protocolVersion": 1,
     "minMacOS": "15.0",
@@ -26,13 +26,13 @@
     "appName": "Cyan Command.app",
     "icon": "command",
     "description": "快速指令与本地翻译",
-    "sha256": "06f0c2776a3c600e751924908a890b1db1b3e55807c636ada54e96143e5cc14b",
+    "sha256": "8911b9b0eb97cfa551db4abe01ea784d5ce2e10ce006496fe08d18f0a53a5c5d",
     "assetName": "Cyan-Command-macOS-arm64.zip"
   },
   {
     "id": "cyan-github",
     "name": "Cyan GitHub",
-    "version": "0.1.0-preview.1",
+    "version": "0.1.0-preview.2",
     "bundleID": "io.github.cyanyuanchu.cyan-github",
     "protocolVersion": 1,
     "minMacOS": "14.0",
@@ -41,7 +41,7 @@
     "appName": "Cyan GitHub.app",
     "icon": "arrow.triangle.branch",
     "description": "GitHub 足迹与桌面组件",
-    "sha256": "0325fd9ede8d4236b0ffaa8b92cde62faee6ddb9658687f5f3fee634993443ac",
+    "sha256": "d2313c4f057ae00a9d6d86deda7bd8662241c6c2764a3e548b9f58fba3f583dd",
     "assetName": "Cyan-GitHub-macOS-arm64.zip"
   },
   {
