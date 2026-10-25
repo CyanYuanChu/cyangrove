@@ -1,0 +1,23 @@
+work/
+build/
+modules/
+outputs/
+.DS_Store
+**/xcuserdata/
+*.xcuserstate
+DerivedData/
+__pycache__/
+# 原整合版保留在本机，避免打断正在运行或并行开发的 Passport。
+Host/
+Shared/
+Widget/
+Tests/
+CyanGrove.xcodeproj/
+generate_project.py
+Resources/PassportBridge/
+Resources/PassportPet.png
+Resources/ThirdPartyNotices.txt
+Resources/CyanGroveLeaf.png
+scripts/build.sh
+scripts/check.sh
+scripts/render-app-icon.swift
