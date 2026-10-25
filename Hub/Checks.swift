@@ -43,7 +43,13 @@ import CryptoKit
         let center=ModuleCenter();let before=NSApp.windows.count
         var loaded:[GrovePluginHandle]=[]
         do{
-            for m in center.modules{
+            for base in center.modules{
+                var m = base
+                let manifest = root.appendingPathComponent(m.id+"/module.json")
+                let built = try JSONSerialization.jsonObject(with: Data(contentsOf: manifest)) as! [String:Any]
+                guard built["id"] as? String == m.id, built["protocolVersion"] as? Int == 2, let version = built["version"] as? String else { throw PluginError.message("Built feature identity does not match the host ABI") }
+                m.version = version
+                guard m.safePaths else { throw PluginError.message("Invalid built feature version") }
                 let url=root.appendingPathComponent(m.id+"/build/"+m.moduleName)
                 try ModuleFiles.verify(url,m)
                 let handle=try GrovePluginHandle(url:url)
