@@ -8,11 +8,15 @@ import AppKit
         do {
             guard try server.start(id:"cyangrove",handler:{ [weak self] action in
                 if action == "show" {self?.show()}
+                if action == "navigate:tab-bridge" {self?.center.selected="tab-bridge";self?.show()}
+                if action == "tab-bridge:start" {await TabBridgeService.shared.start()}
+                if action == "tab-bridge:stop" {TabBridgeService.shared.stop()}
+                if action == "tab-bridge:connect" {await TabBridgeService.shared.connectPlugin()}
                 if action == "check-updates" {await self?.center.checkUpdates()}
                 if action.hasPrefix("install:") {let id=String(action.dropFirst(8));if let m=self?.center.modules.first(where:{$0.id==id}) {await self?.center.install(m)}}
                 if action == "quit" {DispatchQueue.main.asyncAfter(deadline:.now()+0.15){NSApp.terminate(nil)}}
                 if action.hasPrefix("enable:") || action.hasPrefix("disable:") || action.hasPrefix("navigate:") { let parts=action.split(separator:":",maxSplits:1);if parts.count==2,let m=self?.center.modules.first(where:{$0.id==String(parts[1])}) { if parts[0]=="navigate" {self?.center.selected=m.id;self?.show()}else{await self?.center.setEnabled(m,parts[0]=="enable")} } }
-                return ["protocolVersion":1,"id":"cyangrove","ok":true,"installed":self?.center.modules.filter{ModuleFiles.installed($0) != nil}.count ?? 0,"active":Array(self?.center.active ?? []),"embedded":true,"menuImageWidth":self?.center.menuBarImage("cyan-monitor")?.size.width ?? 0,"versions":self?.center.snapshots.mapValues{$0.version} ?? [:],"pendingRestart":self?.center.modules.filter{self?.center.needsRestart($0)==true}.map{$0.id} ?? [],"pid":ProcessInfo.processInfo.processIdentifier]
+                return ["protocolVersion":1,"id":"cyangrove","ok":true,"installed":self?.center.modules.filter{ModuleFiles.installed($0) != nil}.count ?? 0,"active":Array(self?.center.active ?? []),"embedded":true,"tabBridge":["running":TabBridgeService.shared.running,"installed":TabBridgeService.shared.installed,"error":TabBridgeService.shared.error ?? ""],"menuImageWidth":self?.center.menuBarImage("cyan-monitor")?.size.width ?? 0,"versions":self?.center.snapshots.mapValues{$0.version} ?? [:],"pendingRestart":self?.center.modules.filter{self?.center.needsRestart($0)==true}.map{$0.id} ?? [],"pid":ProcessInfo.processInfo.processIdentifier]
             }) else {Task.detached {_ = try? ModuleIPC.request("cyangrove",action:"show");await MainActor.run{NSApp.terminate(nil)}};return}
         } catch {print(error.localizedDescription);NSApp.terminate(nil);return}
         let w=NSWindow(contentRect:NSRect(x:0,y:0,width:1180,height:880),styleMask:[.titled,.closable,.miniaturizable,.resizable],backing:.buffered,defer:false)
@@ -26,7 +30,7 @@ import AppKit
         let edit=NSMenuItem();let editMenu=NSMenu(title:"编辑")
         for (title,selector,key) in [("撤销","undo:","z"),("剪切","cut:","x"),("复制","copy:","c"),("粘贴","paste:","v"),("全选","selectAll:","a")] {editMenu.addItem(withTitle:title,action:Selector(selector),keyEquivalent:key)}
         edit.submenu=editMenu;main.addItem(edit);NSApp.mainMenu=main
-        updateItem();center.start()
+        updateItem();center.start();_ = TabBridgeService.shared
         timer=Timer.scheduledTimer(withTimeInterval:2,repeats:true){[weak self] _ in Task{@MainActor in self?.updateItem()}}
         if !GroveLaunchContext.shouldStartQuietly(arguments:CommandLine.arguments,event:NSAppleEventManager.shared().currentAppleEvent){show()}else{NSApp.setActivationPolicy(.accessory)}
     }
@@ -44,10 +48,10 @@ import AppKit
     @objc func show(){NSApp.setActivationPolicy(.regular);NSApp.activate(ignoringOtherApps:true);window?.makeKeyAndOrderFront(nil)}
     @objc func modules(){center.selected="modules";show()}
     @objc func quit(){NSApp.terminate(nil)}
-    func applicationWillTerminate(_ notification:Notification){timer?.invalidate();center.stopAll();server.stop()}
+    func applicationWillTerminate(_ notification:Notification){timer?.invalidate();center.stopAll();TabBridgeService.shared.shutdown();server.stop()}
     func applicationShouldTerminateAfterLastWindowClosed(_ sender:NSApplication)->Bool{false}
     func applicationShouldHandleReopen(_ sender:NSApplication,hasVisibleWindows flag:Bool)->Bool{show();return true}
-    func application(_ application:NSApplication,open urls:[URL]){ if let id=urls.first?.host,let m=center.modules.first(where:{$0.id==id}) {Task{await center.open(m)}}else{center.selected="modules"};show() }
+    func application(_ application:NSApplication,open urls:[URL]){ if urls.first?.host=="tab-bridge" {center.selected="tab-bridge";show();return}; if let id=urls.first?.host,let m=center.modules.first(where:{$0.id==id}) {Task{await center.open(m)}}else{center.selected="modules"};show() }
 }
 
 @main struct CyanGroveHub {

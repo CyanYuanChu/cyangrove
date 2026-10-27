@@ -1,0 +1,13 @@
+{
+  "name": "ai-tab-grouper-acp-bridge",
+  "version": "0.7.1",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test ../tests/acp-*.test.mjs" },
+  "dependencies": {
+    "@agentclientprotocol/codex-acp": "2.3.0",
+    "@agentclientprotocol/claude-agent-acp": "0.97.0",
+    "pi-acp": "0.0.34"
+  }
+}

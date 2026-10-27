@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AI 自动标签分组</title><link rel="icon" type="image/svg+xml" href="icons/icon.svg"><link rel="stylesheet" href="ui.css"><link rel="stylesheet" href="assistant.css"><link rel="stylesheet" href="popup.css"></head>
+<body>
+<main class="popup-shell">
+  <header class="popup-header"><div class="brand"><img src="icons/icon.svg" alt=""><div><strong>AI 自动标签分组</strong><small>整理有序，找回轻松</small></div></div><button class="icon-btn" id="openOptions" aria-label="打开设置" title="打开设置">⚙</button></header>
+  <section class="overview" aria-label="分组状态"><div><span class="state" id="state">读取状态…</span><p id="message" role="status">正在连接后台</p></div><div class="tab-total"><strong id="tabCount">—</strong><span>可整理</span></div></section>
+  <section class="bridge-control" aria-label="ACP 桥接"><div><strong>ACP 桥接</strong><small id="bridgeState" role="status">正在读取状态…</small></div><button type="button" id="bridgeToggle" role="switch" aria-label="ACP 桥接开关" aria-checked="false">开启桥接</button></section>
+  <div class="popup-tabs" role="tablist" aria-label="插件功能"><button type="button" id="recentTab" role="tab" aria-selected="false" aria-controls="recentPanel" tabindex="-1">⌕ 最近页面</button><button type="button" id="chatTab" role="tab" aria-selected="true" aria-controls="chatPanel">✦ AI 对话</button></div>
+  <section id="recentPanel" class="finder" role="tabpanel" aria-labelledby="recentTab" hidden>
+    <label class="search-box"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="searchTabs" type="search" aria-label="搜索标题、网址或分组" placeholder="找回页面，搜索标题 / 网址 / 分组" autocomplete="off" spellcheck="false"><button class="clear-search" type="button" id="clearSearch" aria-label="清空搜索" hidden>×</button></label>
+    <div class="finder-tools"><div class="list-heading"><h2 id="listLabel">最近访问</h2><span class="list-count" id="listCount">读取中</span></div><div class="finder-selects"><select id="windowScope" aria-label="窗口范围"><option value="all">全部窗口</option><option value="current">当前窗口</option></select><select id="recentLimit" aria-label="最近访问显示数量"><option value="10">最近 10 个</option><option value="20">最近 20 个</option><option value="50">最近 50 个</option></select></div></div>
+    <div class="tab-list" id="tabList" aria-label="页面列表"></div>
+    <div class="empty-state" id="listEmpty" hidden><span class="empty-symbol" aria-hidden="true">⌕</span><strong id="emptyTitle"></strong><p id="emptyDetail"></p></div>
+    <p class="finder-feedback" id="finderFeedback" aria-live="polite">按最近访问排序 · 点击回到原页面</p>
+  </section>
+  <section id="chatPanel" class="popup-chat" role="tabpanel" aria-labelledby="chatTab">
+    <div class="popup-chat-toolbar"><label class="chat-scope-label"><select id="chatScope" aria-label="AI 对话操作范围"><option value="current">当前窗口</option><option value="all">全部窗口</option></select></label><button type="button" id="chatClear" class="clear-chat" disabled>清空对话</button></div>
+    <div id="chatWelcome" class="chat-welcome"><strong>直接说，你想怎么整理？</strong><p>查找、切换、关闭页面，在这里完成。</p><div class="chat-examples"><button type="button" data-chat-example="找出所有文档页面">找文档</button><button type="button" data-chat-example="关掉所有 B 站视频页面">关掉 B 站视频</button></div></div>
+    <div class="chat-messages" id="chatMessages" role="log" aria-label="AI 对话记录" aria-live="polite" aria-relevant="additions text"></div>
+    <div id="chatBusy" class="chat-busy" role="status" hidden>AI 正在处理，关闭弹窗也会继续…</div>
+    <form id="chatForm" class="chat-composer"><textarea id="chatInput" autofocus rows="2" maxlength="4000" aria-label="给 AI 的标签管理要求" placeholder="说说你想怎么管理这些页面…"></textarea><div class="chat-composer-actions"><span>Enter 发送 · Shift + Enter 换行</span><button id="chatSubmit" class="primary" type="submit">发送 ↗</button></div></form>
+    <p id="chatHint" class="chat-hint" aria-live="polite">支持系统语音输入法，文字输入即可。</p>
+  </section>
+  <footer class="popup-footer"><div class="footer-note"><span class="leaf-dot"></span>保留分组，也能随时找回</div><button class="ghost" id="applyPreview" hidden>应用预览</button><button class="ghost" id="runNow">立即整理</button></footer>
+</main>
+<script src="common.js"></script><script src="finder.js"></script><script src="popup.js"></script><script src="bridge-control.js"></script><script src="assistant.js"></script>
+</body></html>

@@ -55,3 +55,8 @@ python3 scripts/test-native-modules.py
 ```
 
 接口、更新和生命周期见 [docs/modules.md](docs/modules.md)。
+
+
+## 浏览器桥接与标签分组插件
+
+Grove 左侧「浏览器桥接」提供 ACP 服务开关、适配器安装与插件连接。插件在 [`extensions/ai-tab-grouper`](extensions/ai-tab-grouper)，支持 Codex（默认）、Pi 和 Claude Code。将该目录作为已解压扩展加载到 Chrome，再按 [接入说明](docs/acp-tab-bridge.md) 配置。自动分组与标签管理对话共用所选 Agent。

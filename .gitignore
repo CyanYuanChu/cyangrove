@@ -21,3 +21,8 @@ Resources/CyanGroveLeaf.png
 scripts/build.sh
 scripts/check.sh
 scripts/render-app-icon.swift
+
+**/node_modules/
+extensions/ai-tab-grouper/dist/
+**/.env
+**/.env.*

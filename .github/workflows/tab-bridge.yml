@@ -1,0 +1,16 @@
+name: ACP tab bridge
+on:
+  push:
+    paths: ['extensions/ai-tab-grouper/**', 'Hub/TabBridge.swift', '.github/workflows/tab-bridge.yml']
+  pull_request:
+    paths: ['extensions/ai-tab-grouper/**', 'Hub/TabBridge.swift', '.github/workflows/tab-bridge.yml']
+jobs:
+  extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: for test in extensions/ai-tab-grouper/tests/*.test.js; do node "$test" || exit 1; done
+      - run: node --test extensions/ai-tab-grouper/tests/acp-*.test.mjs
