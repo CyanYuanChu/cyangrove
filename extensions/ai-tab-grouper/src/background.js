@@ -131,7 +131,7 @@ async function buildModelPrompt(settings, tabs) {
 
 async function callAcp(settings, userPrompt, options = {}) {
   C.validateConnection(settings);
-  if (!settings.bridgeToken) throw new Error("请先在 Cyan Grove 的「浏览器桥接」中点击「连接插件」");
+  if (!settings.bridgeToken) throw new Error("请先打开插件中的「ACP 桥接」开关");
   const timeoutMs = options.timeoutMs || 180000;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs + 3000);
@@ -145,7 +145,7 @@ async function callAcp(settings, userPrompt, options = {}) {
       });
     } catch (error) {
       if (error.name === "AbortError") throw new Error("ACP 请求超时，请检查 Agent 登录和网络");
-      throw new Error("无法连接 ACP 桥接，请在 Cyan Grove 的「浏览器桥接」中开启服务");
+      throw new Error("无法连接 ACP 桥接，请打开插件中的「ACP 桥接」开关");
     }
     let data;
     try { data = await response.json(); } catch { throw new Error("ACP 桥接返回了无效响应"); }

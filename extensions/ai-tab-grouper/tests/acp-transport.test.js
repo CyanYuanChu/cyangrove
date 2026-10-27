@@ -11,8 +11,8 @@ function harness(fetch){
  assert.equal(await ok.call({agent:'pi',acpModel:'chosen'}),'{"ok":true}');
  assert.equal(ok.seen[0],'http://127.0.0.1:48765/v1/prompt');
  const body=JSON.parse(ok.seen[1].body);assert.equal(body.agent,'pi');assert.equal(body.model,'chosen');assert.equal(body.systemPrompt,'system');assert.ok(!('apiKey' in body));assert.equal(ok.cleaned,2);
- const missing=harness(async()=>{throw Error('must not fetch');});await assert.rejects(missing.call({bridgeToken:''}),/连接插件/);
- const failure=harness(async()=>{throw TypeError('offline');});await assert.rejects(failure.call(),/Cyan Grove.*开启服务/);assert.equal(failure.cleaned,2);
+ const missing=harness(async()=>{throw Error('must not fetch');});await assert.rejects(missing.call({bridgeToken:''}),/ACP 桥接.*开关/);
+ const failure=harness(async()=>{throw TypeError('offline');});await assert.rejects(failure.call(),/ACP 桥接.*开关/);assert.equal(failure.cleaned,2);
  const auth=harness(async()=>({ok:false,status:401,json:async()=>({error:'密钥不匹配'})}));await assert.rejects(auth.call(),/密钥不匹配/);assert.equal(auth.cleaned,2);
  require('../src/common.js');const C=globalThis.AITabGrouper;assert.equal(C.DEFAULT_SETTINGS.transport,'acp');assert.equal(C.DEFAULT_SETTINGS.agent,'codex');assert.ok(!Object.hasOwn(C.pickSyncSettings({bridgeToken:'secret'}),'bridgeToken'));
  assert.doesNotThrow(()=>C.validateConnection({...C.DEFAULT_SETTINGS,model:'',endpoint:'invalid'}));
