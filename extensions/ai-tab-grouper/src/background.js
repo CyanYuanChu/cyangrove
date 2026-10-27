@@ -233,6 +233,7 @@ async function controlBridgeFromExtension(action) {
     await chrome.storage.local.set({ settings: { ...(stored.settings || {}), bridgeToken: result.token, transport: "acp" }, runtimeStatus: { ...INITIAL_STATUS, message: "ACP 桥接已开启，可以对话或整理标签" } });
     await chrome.storage.sync.set({ transport: "acp" }).catch(() => {});
   }
+  if (action !== "status") await setStatus({ state: "idle", lastError: null, message: result.running ? "ACP 桥接已开启，可以对话或整理标签" : "ACP 桥接已关闭，开启后可继续使用 AI" });
   const settings = await getSettings();
   return { ok: true, running: result.running, connected: Boolean(settings.bridgeToken), agent: {codex:"Codex",pi:"Pi",claude:"Claude Code"}[settings.agent] || "ACP" };
 }
