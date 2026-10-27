@@ -14,7 +14,9 @@ struct HubView:View {
         HStack(spacing:0){sidebar
             VStack(spacing:0){
                 toolbar
-                if let m=center.modules.first(where:{$0.id==center.selected}){
+                if center.selected=="tab-bridge"{
+                    TabBridgePage()
+                }else if let m=center.modules.first(where:{$0.id==center.selected}){
                     featurePage(m)
                 }else{
                     ScrollView{VStack(alignment:.leading,spacing:24){
@@ -32,6 +34,7 @@ struct HubView:View {
             nav("我的 Grove",icon:"square.grid.2x2",id:"home")
             nav("功能管理",icon:"shippingbox",id:"modules")
             Text("工作空间").font(.caption).foregroundStyle(p.secondary).padding(.top,18)
+            nav("浏览器桥接",icon:"network",id:"tab-bridge")
             ForEach(center.modules.filter{center.active.contains($0.id)}){m in nav(title(m),icon:m.icon,id:m.id)}
             Spacer()
             Text("需要的能力，留在这里。\n按需开启，专心使用。").font(.system(size:12)).foregroundStyle(p.secondary).lineSpacing(7).padding(.bottom,16)
@@ -41,7 +44,7 @@ struct HubView:View {
     }
     var toolbar:some View{
         HStack{
-            Text(center.modules.first(where:{$0.id==center.selected}).map(title) ?? (center.selected=="settings" ? "偏好设置":center.selected=="home" ? "我的 Grove":"功能管理")).font(.system(size:14,weight:.semibold))
+            Text(center.modules.first(where:{$0.id==center.selected}).map(title) ?? (center.selected=="tab-bridge" ? "浏览器桥接":center.selected=="settings" ? "偏好设置":center.selected=="home" ? "我的 Grove":"功能管理")).font(.system(size:14,weight:.semibold))
             Spacer()
             if let m=center.modules.first(where:{$0.id==center.selected}){
                 Button("刷新"){Task{await center.action(m,"refresh")}}.disabled(!center.active.contains(m.id))

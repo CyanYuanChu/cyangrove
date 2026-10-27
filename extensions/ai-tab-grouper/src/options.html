@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI 自动标签分组设置</title><link rel="icon" type="image/svg+xml" href="icons/icon.svg"><link rel="stylesheet" href="ui.css"><link rel="stylesheet" href="options.css"><link rel="stylesheet" href="assistant.css"></head>
+<body>
+<aside class="sidebar">
+  <a class="brand brand-link" href="#find"><img src="icons/icon.svg" alt=""><div><strong>自动标签分组</strong><small>AI TAB GROUPER</small></div></a>
+  <p class="nav-caption">你的浏览工作台</p>
+  <nav aria-label="设置导航"><a href="#assistant"><span aria-hidden="true">✦</span>AI 对话<i>NEW</i></a><a class="active" href="#find"><span aria-hidden="true">⌕</span>找回页面</a><a href="#automation"><span aria-hidden="true">◷</span>自动整理</a><a href="#connection"><span aria-hidden="true">⌘</span>模型连接</a><a href="#rules"><span aria-hidden="true">≡</span>分类规则</a><a href="#activity"><span aria-hidden="true">◴</span>运行记录</a><a href="#shortcuts"><span aria-hidden="true">⇧</span>视频快捷键</a></nav>
+  <div class="sidebar-bottom"><div class="local-note"><span class="leaf-dot"></span><strong>按你的方式整理</strong><p>时间线找回，主题组归档。<br>页面归属不变，入口不止一个。</p></div><div class="sidebar-version"><span>本地优先 · 自选模型</span><span class="version">v0.7.1</span></div></div>
+</aside>
+<main class="shell">
+  <header class="hero"><div><p class="eyebrow">YOUR BROWSING, IN ORDER</p><h1>每个页面，都能轻松找回<span>。</span></h1><p class="subtitle">按用途整理，用时间线找回。让打开的页面，成为有序的工作空间。</p></div><span class="status-badge" id="statusBadge">读取状态</span></header>
+  <section class="card assistant-card" id="assistant" aria-labelledby="assistantTitle">
+    <div class="section-heading"><div><span class="section-kicker">AI / TALK TO YOUR TABS</span><h2 id="assistantTitle">一句话，管理你的页面</h2><p class="hint">直接说你想做什么，AI 选择页面，插件执行并反馈结果。</p></div><div class="chat-heading-actions"><span class="feature-tag">复用模型连接</span><button class="text-button" id="chatClear" type="button" disabled>清空对话</button></div></div>
+    <label class="chat-scope-label"><span>操作范围</span><select id="chatScope" aria-label="AI 对话操作范围"><option value="current">当前窗口</option><option value="all">全部窗口</option></select><span>只读取标题、域名、分组与可选路径</span></label>
+    <div class="chat-welcome" id="chatWelcome"><strong>从一句简单的话开始。</strong><p>查找、切换或关闭页面，都可以直接告诉我。</p><div class="chat-examples"><button type="button" data-chat-example="找出所有文档类页面">找出文档页面</button><button type="button" data-chat-example="把所有 B 站视频页面关掉">关掉 B 站视频</button><button type="button" data-chat-example="关闭「视频娱乐」分组里的全部页面">关闭某个分组的页面</button><button type="button" data-chat-example="切换到力扣页面">回到力扣</button></div></div>
+    <div class="chat-messages" id="chatMessages" role="log" aria-label="AI 对话记录" aria-live="polite" aria-relevant="additions text"></div>
+    <div id="chatBusy" class="chat-busy" role="status" hidden>AI 正在理解要求并处理标签…</div>
+    <form id="chatForm" class="chat-composer"><textarea id="chatInput" rows="2" maxlength="4000" placeholder="例如：把「视频娱乐」分组里的页面都关掉，保留其他页面" aria-label="给 AI 的标签管理要求"></textarea><div class="chat-composer-actions"><span>Enter 发送 · Shift + Enter 换行</span><button class="primary" id="chatSubmit" type="submit">发送 ↗</button></div></form>
+    <p class="chat-hint" id="chatHint" aria-live="polite">输入文字即可；也支持使用系统语音输入法。</p>
+  </section>
+  <section class="card finder-card" id="find" aria-labelledby="finderTitle">
+    <div class="section-heading"><div><span class="section-kicker">01 / FIND YOUR WAY BACK</span><h2 id="finderTitle">刚才的页面，在这里</h2><p class="hint">跨越分组查找已打开的网页，点击直接回到原来的标签。</p></div><span class="feature-tag">无需调用模型</span></div>
+    <div class="finder">
+      <label class="search-box"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="searchTabs" type="search" aria-label="搜索标题、网址或分组" placeholder="搜索标题、网址或分组名称" autocomplete="off" spellcheck="false"><button id="clearSearch" class="clear-search" type="button" aria-label="清空搜索" hidden>×</button><kbd class="search-key">↵</kbd></label>
+      <div class="finder-tools"><div class="list-heading"><h3 id="listLabel">最近访问</h3><span class="list-count" id="listCount">读取中</span></div><div class="finder-selects"><select id="windowScope" aria-label="窗口范围"><option value="all">全部窗口</option><option value="current">当前窗口</option></select><select id="recentLimit" aria-label="最近访问显示数量"><option value="10">最近 10 个</option><option value="20">最近 20 个</option><option value="50">最近 50 个</option></select></div></div>
+      <div id="tabList" class="tab-list" aria-label="页面列表"></div>
+      <div class="empty-state" id="listEmpty" hidden><span class="empty-symbol" aria-hidden="true">⌕</span><strong id="emptyTitle"></strong><p id="emptyDetail"></p></div>
+      <p id="finderFeedback" class="finder-feedback" aria-live="polite">按最近访问排序 · 搜索覆盖全部页面 · 显示偏好即时保存在本机</p>
+    </div>
+  </section>
+  <section class="card" id="automation" aria-labelledby="automationTitle">
+    <div class="section-heading"><div><span class="section-kicker">02 / AUTOMATION</span><h2 id="automationTitle">让整理自然发生</h2><p class="hint">仅在标签发生变化后请求模型，减少重复调用。</p></div></div>
+    <div class="automation-layout"><div class="toggle-stack"><label class="toggle-row"><span><strong>自动整理标签</strong><small>新增、关闭、移动或导航后，定时检查变化</small></span><input id="autoEnabled" type="checkbox" role="switch"><span class="switch" aria-hidden="true"></span></label><label class="toggle-row"><span><strong>自动应用分组</strong><small>关闭时生成预览，由你确认后应用</small></span><input id="autoApply" type="checkbox" role="switch"><span class="switch" aria-hidden="true"></span></label></div><label class="interval-panel"><span class="label">检查间隔</span><span class="field-with-unit"><input id="intervalMinutes" type="number" min="1" max="1440" step="1"><span>分钟</span></span><span class="hint">没有变化，就跳过模型调用。</span></label></div>
+  </section>
+  <section class="card" id="connection" aria-labelledby="connectionTitle">
+    <div class="section-heading"><div><span class="section-kicker">03 / AGENT CONNECTION</span><h2 id="connectionTitle">选择你的 AI 助手</h2><p class="hint">通过 Cyan Grove 连接本机 Agent，复用它的登录与默认模型。</p></div><span class="feature-tag">ACP</span></div>
+    <label class="connection-type"><span class="label">连接方式</span><select id="transport"><option value="acp">ACP · 本机 Agent</option><option value="openai">OpenAI 兼容接口</option></select></label>
+    <div id="acpFields">
+      <section class="bridge-control" aria-label="ACP 桥接"><div><strong>ACP 桥接</strong><small id="bridgeState" role="status">正在读取状态…</small></div><button type="button" id="bridgeToggle" role="switch" aria-label="ACP 桥接开关" aria-checked="false">开启桥接</button></section>
+      <div class="preset-buttons" aria-label="ACP Agent"><button type="button" class="ghost" data-agent="codex" aria-pressed="true">Codex <span>默认</span></button><button type="button" class="ghost" data-agent="pi" aria-pressed="false">Pi</button><button type="button" class="ghost" data-agent="claude" aria-pressed="false">Claude Code</button></div>
+      <div class="form-grid"><label><span class="label">Agent 模型（可选）</span><input id="acpModel" type="text" spellcheck="false" placeholder="留空使用所选 Agent 的默认模型"><span class="field-help">填写该 Agent 支持的模型 ID；切换 Agent 时会清空。</span></label><label><span class="label">桥接密钥 · 仅存本机</span><input id="bridgeToken" type="password" autocomplete="off" spellcheck="false" placeholder="开启上方桥接后自动填写"></label></div>
+      <p class="security-note">点击上方开关即可启动并连接。首次需在 Grove 安装适配器；Agent 需事先登录。</p>
+    </div>
+    <div id="httpFields" hidden>
+      <div class="preset-buttons" aria-label="模型服务预设"><button class="ghost" data-preset="lmstudio">LM Studio</button><button class="ghost" data-preset="deepseek">DeepSeek</button><button class="ghost" data-preset="openai">OpenAI</button></div>
+      <div class="form-grid"><label class="wide"><span class="label">接口地址</span><input id="endpoint" type="url" spellcheck="false" placeholder="https://api.openai.com/v1/chat/completions"></label><label><span class="label">模型名称</span><input id="model" type="text" spellcheck="false"></label><div><label for="apiKey" class="label key-label">API Key</label><div class="password-field"><input id="apiKey" type="password" spellcheck="false" autocomplete="off"><button type="button" id="toggleKey" aria-label="显示 API Key" aria-pressed="false">显示</button></div></div></div>
+    </div>
+    <div class="connection-bottom"><p class="security-note" id="connectionSummary">分组与 AI 对话使用同一个 Agent。</p><button class="ghost" id="testConnection">测试连接 <span aria-hidden="true">↗</span></button></div>
+  </section>
+  <section class="card" id="rules" aria-labelledby="rulesTitle">
+    <div class="section-heading"><div><span class="section-kicker">04 / YOUR ORGANIZING RULES</span><h2 id="rulesTitle">定义你的分类习惯</h2><p class="hint">告诉模型如何命名、合并和区分不同用途的标签。</p></div><button class="text-button" id="resetPrompt">恢复默认</button></div>
+    <label class="prompt-editor"><span class="editor-label">分类指令 <span>PROMPT</span></span><textarea id="prompt" rows="13" spellcheck="false" aria-label="分类 Prompt"></textarea></label>
+    <div class="rule-checks"><label class="check-row"><input id="includeGrouped" type="checkbox"><span>整理已有标签组</span></label><label class="check-row"><input id="includePinned" type="checkbox"><span>包含固定标签</span></label><label class="check-row"><input id="collapsed" type="checkbox"><span>新分组默认折叠</span></label><label class="check-row"><input id="includePath" type="checkbox"><span>发送 URL 路径与查询参数</span></label></div>
+    <label class="max-tabs"><span><strong>单次分析上限</strong><small>每次最多送入模型的标签数量</small></span><input id="maxTabs" type="number" min="10" max="500" step="10"><span class="muted">个</span></label>
+  </section>
+  <section class="card" id="activity" aria-labelledby="activityTitle">
+    <div class="section-heading"><div><span class="section-kicker">05 / ACTIVITY</span><h2 id="activityTitle">查看这一次整理</h2><p class="hint" id="statusMessage" role="status">正在读取后台状态</p></div><div class="action-row"><button class="ghost" id="applyPreview" hidden>应用上次预览</button><button class="primary" id="runNow">✦ 立即整理</button></div></div>
+    <dl class="stats"><div><dt>当前可整理</dt><dd id="tabCount">—</dd></div><div><dt>上次整理页面</dt><dd id="lastTabCount">—</dd></div><div><dt>上次生成分组</dt><dd id="groupCount">—</dd></div><div><dt>上次运行时间</dt><dd id="lastRunAt">—</dd></div></dl><pre id="errorBox" class="error" hidden></pre>
+  </section>
+  <section class="card shortcuts-card" id="shortcuts" aria-labelledby="shortcutTitle"><div><span class="section-kicker">06 / A LITTLE EXTRA</span><h2 id="shortcutTitle">视频，跟上你的节奏</h2><p class="hint">YouTube 播放页倍速控制，输入文字时不会触发。</p></div><div class="shortcut-grid"><div><kbd>=</kbd><span>加速 <small>+0.25× · 最高 5×</small></span></div><div><kbd>−</kbd><span>减速 <small>−0.25× · 最低 0.25×</small></span></div></div></section>
+  <footer class="save-bar"><span class="save-status"><span class="save-dot"></span><span id="saveHint" aria-live="polite">模型与整理规则修改后，点击保存。</span></span><button class="primary" id="saveSettings">保存设置 <span aria-hidden="true">↗</span></button></footer>
+  <p class="page-note">模型连接、Prompt 与整理偏好可跨设备同步；API Key、对话记录与最近页面显示偏好留在本机。</p>
+</main>
+<script src="common.js"></script><script src="finder.js"></script><script src="options.js"></script><script src="bridge-control.js"></script><script src="assistant.js"></script>
+</body></html>
