@@ -7,6 +7,9 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 const exec = promisify(execFile);
 const directory = join(homedir(), 'Library/Application Support/CyanGroveHub/TabBridge');
+export function validCaller(origin, extensionId) {
+  return String(origin || "").replace(/\/$/, "") === `chrome-extension://${extensionId}`;
+}
 export function requestGrove(action) {
   return new Promise((resolve, reject) => {
     const socket = net.createConnection(`/tmp/cyan-modules-${process.getuid()}/cyangrove.sock`);
@@ -69,7 +72,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     handled=true;
     try {
       const config=JSON.parse(await readFile(join(directory,'config.json'),'utf8'));
-      if(process.argv[2]!==`chrome-extension://${config.extensionId}/`)throw new Error('插件来源不匹配，请从 Cyan Grove 重新安装控制组件');
+      if(!validCaller(process.argv[2],config.extensionId))throw new Error('插件来源不匹配，请从 Cyan Grove 重新安装控制组件');
       const message=JSON.parse(input.subarray(4,length+4).toString('utf8'));
       const result=await controlBridge(message.action);clearTimeout(timeout);reply(result);
     } catch(error) {clearTimeout(timeout);reply({ok:false,message:error.message||'桥接控制失败'});}

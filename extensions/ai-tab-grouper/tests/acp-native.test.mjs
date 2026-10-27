@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { controlBridge } from '../bridge/native-control.mjs';
+import { controlBridge, validCaller } from '../bridge/native-control.mjs';
 test('native start launches Grove when closed and returns a token only over native messaging',async()=>{
  let up=false,launched=0,requests=0;
  const result=await controlBridge('start',{request:async action=>{requests++;if(requests===1)throw Error('closed');assert.equal(action,'tab-bridge:start');up=true;return {};},launch:async()=>{launched++;},isRunning:async()=>up,config:async()=>JSON.stringify({token:'a'.repeat(64)}),pause:async()=>{}});
@@ -17,3 +17,7 @@ test('native start surfaces installation failures',async()=>{
  await assert.rejects(controlBridge('start',{request:async()=>({tabBridge:{error:'请先安装 ACP 适配器'}}),isRunning:async()=>false,pause:async()=>{}}),/安装 ACP/);
 });
 test('native control rejects arbitrary commands',async()=>{await assert.rejects(controlBridge('exec'),/不支持/);});
+
+test('native origin accepts Chrome origin serialization and denies other extensions',()=>{
+ const id='a'.repeat(32);assert.ok(validCaller('chrome-extension://'+id,id));assert.ok(validCaller('chrome-extension://'+id+'/',id));assert.equal(validCaller('chrome-extension://'+'b'.repeat(32)+'/',id),false);assert.equal(validCaller('https://'+id,id),false);
+});
